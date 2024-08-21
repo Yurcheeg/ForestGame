@@ -206,7 +206,7 @@ public class Battle : MonoBehaviour
         Debug.Log($"dmg{dmg}");
         if(dmg > 0)
         {
-            StartCoroutine(HitFlash(player));
+            yield return StartCoroutine(HitFlash(player));
         }
         if (enemyIntention.appliesStatus)
         {
@@ -335,22 +335,26 @@ public class Battle : MonoBehaviour
     {
         SpriteRenderer sprite = unit.GetComponent<SpriteRenderer>();
         Animator animator = unit.GetComponent<Animator>();
+
         sprite.color = new Color(1f, 0.3f, 0);
         animator.SetTrigger("Hit");
+
         yield return new WaitForSeconds(0.2f);
         sprite.color = new Color(255, 255, 255);
+        yield return null;
         yield return new WaitForSeconds(1f);
     }
     public IEnumerator HitFlash(Unit unit,Color color)
     {
         SpriteRenderer sprite = unit.GetComponent<SpriteRenderer>();
         Animator animator = unit.GetComponent<Animator>();
+
         sprite.color = color;
         animator.SetTrigger("Hit");
-        //yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f);
-        //yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
         yield return new WaitForSeconds(0.2f);
         sprite.color = new Color(255, 255, 255);
-        yield return new WaitForSeconds(2f);
+        yield return null;
+        yield return new WaitForSeconds(1f);
     }
 }
