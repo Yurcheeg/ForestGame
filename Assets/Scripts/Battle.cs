@@ -31,7 +31,7 @@ public class Battle : MonoBehaviour
     public Image lossScreen;
 
     public TMP_Text enemyIntentionText;
-    public Image enemyIntentionIcon;
+    public SpriteRenderer enemyIntentionIcon;
 
     public List<Button> actionButtons;
 
