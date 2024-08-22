@@ -28,6 +28,7 @@ public class Battle : MonoBehaviour
     public GameObject BattleUI;
     public TMP_Text rollText;
     public Image winScreen;
+    public Image lossScreen;
 
     public TMP_Text enemyIntentionText;
     public Image enemyIntentionIcon;
@@ -221,10 +222,12 @@ public class Battle : MonoBehaviour
         if (player.currentHealth <= 0)
         {
             BattleLoss();
+            StartCoroutine(PlayAnimation("Death", player));
         }
         else if (enemy.currentHealth <= 0)
         {
             BattleWin();
+            StartCoroutine(PlayAnimation("Death",enemy));
         }
     }
     public void BattleWin()
@@ -243,6 +246,7 @@ public class Battle : MonoBehaviour
         Debug.Log("battle lost");
         PlayerPrefs.SetInt("playerHp", player.maxHealth);
         PlayerPrefs.Save();
+        lossScreen.gameObject.SetActive(true);
         //game over screen, buttons to start new game or come back to menu. Buttons are turned off
     }
     public void TurnEnd()
@@ -267,7 +271,7 @@ public class Battle : MonoBehaviour
         SwitchButtons(false);
         //List of buttons. when one is triggered the attack plays and the turn goes to the enemy
         int damage = 0;
-
+        
         if (attack.appliesStatusEffect != null && enemy.affectedByStatusEffect == null)
         {
             statusEffect.statusCall[attack.appliesStatusEffect.name](enemy); //get status effect and apply to enemy
@@ -297,9 +301,9 @@ public class Battle : MonoBehaviour
     void Defend()
     {
         SwitchButtons(false);
-        object sender = "Defend";
+       // object sender = "Defend";
         //enemy dmg / 2;
-        OnPlayerAction?.Invoke(sender, EventArgs.Empty);
+        OnPlayerAction?.Invoke("Defend", EventArgs.Empty);
         Debug.Log("player used defend. The incoming damage is cut in half");
     }
     void Evade()
@@ -307,7 +311,7 @@ public class Battle : MonoBehaviour
         SwitchButtons(false);
         object sender = "Evade";
         //if(rollResult>enemyDamage) { do stuff }
-        OnPlayerAction?.Invoke(sender, EventArgs.Empty);
+        OnPlayerAction?.Invoke("Evade", EventArgs.Empty);
         Debug.Log("player used evade. If the roll is bigger than enemy damage, they will dodge the attack");
     }
     void Item()
@@ -321,7 +325,6 @@ public class Battle : MonoBehaviour
         Animator animator = unit.GetComponent<Animator>();
         animator.SetTrigger(triggerName);
         float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
-        //int calculationTimeIndex = 5; // gives enough time to assign a new value of hp at the end of animation
         yield return new WaitForSeconds(animationLength);
     }
     void SwitchButtons(bool state)
