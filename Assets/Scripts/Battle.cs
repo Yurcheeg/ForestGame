@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SocialPlatforms;
+using static UnityEngine.GraphicsBuffer;
 
 
 public enum BattleState
@@ -21,6 +22,9 @@ public class Battle : MonoBehaviour
     public Enemy enemy;
     public Player player;
     public BattleState state;
+
+    public Vector3 playerStartPos;
+    public Vector3 enemyStartPos;
 
     public Animator playerAnimator;
     public Animator enemyAnimator;
@@ -54,6 +58,9 @@ public class Battle : MonoBehaviour
     {
         enemy = FindObjectOfType<Enemy>();
         player = FindObjectOfType<Player>();
+
+        playerStartPos = player.transform.position;
+        enemyStartPos = enemy.transform.position;
 
         playerAnimator = player.GetComponent<Animator>();
         enemyAnimator = enemy.GetComponent<Animator>();
@@ -202,7 +209,10 @@ public class Battle : MonoBehaviour
                     if (dmg > 0)
                     {
                         yield return StartCoroutine(HitFlash(player));
-
+                        if (enemy.transform.position != enemyStartPos)
+                        {
+                            SlideBack(enemy);
+                        }
                     }
                 }
                 break;
@@ -220,6 +230,10 @@ public class Battle : MonoBehaviour
                     if (dmg > 0)
                     {
                         yield return StartCoroutine(HitFlash(player));
+                        if(enemy.transform.position != enemyStartPos)
+                        {
+                            SlideBack(enemy);
+                        }
 
                     }
                 }
@@ -235,6 +249,10 @@ public class Battle : MonoBehaviour
                     if (dmg > 0)
                     {
                         yield return StartCoroutine(HitFlash(player));
+                        if (enemy.transform.position != enemyStartPos)
+                        {
+                            SlideBack(enemy);
+                        }
 
                     }
                 }
@@ -313,6 +331,8 @@ public class Battle : MonoBehaviour
         {
             //attack animations
             yield return StartCoroutine(PlayAnimation("PlayerAttack", player));
+            
+
             Debug.Log("attack animation played");
 
             damage = rollResult * attack.damageMultiplier;
@@ -325,6 +345,10 @@ public class Battle : MonoBehaviour
             DeathCheck();
 
 
+        }
+        if(player.transform.position != playerStartPos)
+        {
+            SlideBack(player);
         }
         object sender = "Attack";
         OnPlayerAction?.Invoke(sender, EventArgs.Empty);
@@ -354,10 +378,16 @@ public class Battle : MonoBehaviour
     }
     private IEnumerator PlayAnimation(string triggerName, Unit unit)
     {
+        if(unit.canSlide)
+        {
+            Slide(unit, enemy);
+        }
         Animator animator = unit.GetComponent<Animator>();
         animator.SetTrigger(triggerName);
         float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
         yield return new WaitForSeconds(animationLength);
+        
+
     }
     void SwitchButtons(bool state)
     {
@@ -391,5 +421,44 @@ public class Battle : MonoBehaviour
         sprite.color = new Color(255, 255, 255);
         yield return null;
         yield return new WaitForSeconds(1f);
+    }
+
+    void Slide(Unit unit, Unit target)
+    {
+        Vector3 endPosition = new Vector3(target.transform.position.x - 1,unit.transform.position.y,unit.transform.position.z);
+        StartCoroutine(SlideToPosition(unit, endPosition, 0.2f));
+    }
+    void SlideBack(Unit unit)
+    {
+        Vector3 endPosition;
+        if (unit == player)
+        {
+            endPosition = playerStartPos;
+        }
+        else if (unit == enemy)
+        {
+            endPosition = enemyStartPos;
+        }
+        else return;
+        
+        StartCoroutine(SlideToPosition(unit,endPosition, 0.2f));
+    }
+    IEnumerator SlideToPosition(Unit unit,Vector3 targetPosition, float duration)
+    {
+        Vector3 startPosition = unit.transform.position;
+        float elapsedTime = 0;
+
+        while (elapsedTime < duration)
+        {
+            unit.transform.position = Vector3.Lerp(unit.transform.position, targetPosition, elapsedTime/duration);
+            elapsedTime += Time.deltaTime;
+            if(unit.transform.position == targetPosition)
+            {
+                yield break;
+            }
+            yield return null;
+        }
+        unit.transform.position = targetPosition;
+
     }
 }
