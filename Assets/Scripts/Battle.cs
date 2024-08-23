@@ -26,7 +26,6 @@ public class Battle : MonoBehaviour
     public Animator enemyAnimator;
 
     public GameObject BattleUI;
-    public TMP_Text rollText;
     public Image winScreen;
     public Image lossScreen;
 
@@ -35,8 +34,13 @@ public class Battle : MonoBehaviour
 
     public List<Button> actionButtons;
 
-    public List<int> dice = new();
+    public int diceAmount;
+    public Image dicePrefab;
+    public Canvas diceUI;
+    public List<Image> diceUiIcons = new();
+    public Dictionary<int,Sprite> dice = new();
     private int rollResult;
+    public List<Sprite> dieSides = new();
 
     public event EventHandler OnPlayerAction;
     public event EventHandler<Unit> OnTurnEnd;
@@ -78,6 +82,7 @@ public class Battle : MonoBehaviour
 
         //on evade and on defend to affect enemy damage
         turnCount = 0;
+
     }
     public void Start()
     {
@@ -96,15 +101,24 @@ public class Battle : MonoBehaviour
     }
     public void TurnStart()
     {
+        dice.Clear();
+        foreach (var die in diceUiIcons)
+        {
+            Destroy(die.gameObject);
+        }
+        diceUiIcons.Clear();
         SetBattleState(BattleState.Start);
         turnCount++;
         //dice roll
         rollResult = 0;
-        for (int i = 0; i < dice.Count; i++)
+        for (int i = 0; i < diceAmount; i++)
         {
             int die = UnityEngine.Random.Range(1, 7);
+            dice.Add(i, dieSides[die-1]);
+            diceUiIcons.Add(Instantiate(dicePrefab,diceUI.transform));
+            diceUiIcons[i].sprite = dice[i];
             Debug.Log($"Die rolled {die}");
-            rollText.text = $"Dice roll: {rollResult += die}";
+            rollResult += die;
         }
 
         //show enemy intentions
@@ -171,7 +185,7 @@ public class Battle : MonoBehaviour
     }
     IEnumerator EnemyPlayAttack(object sender)
     {
-        yield return StartCoroutine(PlayAnimation($"{enemyIntention.animationTriggerName}", enemy));
+
         int dmg = 0;
         switch ((string)sender)
         {
@@ -179,9 +193,17 @@ public class Battle : MonoBehaviour
                 dmg = enemyIntention.damage / 2;//cut in half
                 for(int i = 0; i<enemyIntention.attackCount;i++)
                 {
+                    yield return StartCoroutine(PlayAnimation($"{enemyIntention.animationTriggerName}", enemy));
                     player.currentHealth -= dmg;
                     Debug.Log("Damage was cut in half");
                     Debug.Log($"{enemyIntention.damage}[{enemyIntention.damage / 2}]");
+
+                    Debug.Log($"dmg{dmg}");
+                    if (dmg > 0)
+                    {
+                        yield return StartCoroutine(HitFlash(player));
+
+                    }
                 }
                 break;
 
@@ -189,9 +211,17 @@ public class Battle : MonoBehaviour
                 dmg = enemyIntention.damage * 0;// 0 damage
                 for(int i=0;i<enemyIntention.attackCount;i++)
                 {
+                    yield return StartCoroutine(PlayAnimation($"{enemyIntention.animationTriggerName}", enemy));
                     player.currentHealth -= dmg;
                     Debug.Log("Dodged the attack");
                     Debug.Log($"{enemyIntention.damage}[{enemyIntention.damage * 0}]");
+
+                    Debug.Log($"dmg{dmg}");
+                    if (dmg > 0)
+                    {
+                        yield return StartCoroutine(HitFlash(player));
+
+                    }
                 }
                 break;
 
@@ -199,16 +229,18 @@ public class Battle : MonoBehaviour
                 dmg = enemyIntention.damage;
                 for(int i=0;i<enemyIntention.attackCount; i++)
                 {
+                    yield return StartCoroutine(PlayAnimation($"{enemyIntention.animationTriggerName}", enemy));
                     player.currentHealth -= dmg;
                     Debug.Log($"player got hit by {enemyIntention}");
+                    if (dmg > 0)
+                    {
+                        yield return StartCoroutine(HitFlash(player));
+
+                    }
                 }
                 break;
         }
-        Debug.Log($"dmg{dmg}");
-        if(dmg > 0)
-        {
-            yield return StartCoroutine(HitFlash(player));
-        }
+        
         if (enemyIntention.appliesStatus)
         {
             statusEffect.statusCall[enemyIntention.statusEffect.name](player);//get status effect and apply to player
