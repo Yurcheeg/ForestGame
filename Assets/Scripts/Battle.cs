@@ -50,6 +50,7 @@ public class Battle : MonoBehaviour
     public event EventHandler<Unit> OnTurnEnd;
 
     EnemyAttacks enemyIntention;
+    [SerializeField]AvailableAttacks availableAttacks;
 
     public StatusEffects statusEffect;
     public int turnCount;
@@ -83,7 +84,14 @@ public class Battle : MonoBehaviour
             //item will work differently 
         }
 
+        if(availableAttacks == null)
+        {
+            availableAttacks = FindAnyObjectByType<AvailableAttacks>();
+        }
+
+
         OnPlayerAction += EnemyTurn;
+        OnPlayerAction += ReducePlayerCooldowns;
 
         OnTurnEnd += statusEffect.ApplyStatusEffects;
 
@@ -149,9 +157,11 @@ public class Battle : MonoBehaviour
     {
         for (int i = 0; i < enemy.enemyAttacks.Count; i++)
         {
-            if (enemy.enemyAttackId[i].appliesStatus && player.affectedByStatusEffect == null)
+            if (enemy.enemyAttackId[i].appliesStatus && player.affectedByStatusEffect == null && enemy.enemyAttackId[i].currentCooldown == 0)
             {
+
                 var enemyAttack = enemy.enemyAttackId[i];
+                enemyAttack.currentCooldown = enemyAttack.cooldown;
                 return enemyAttack;
             }
         }
@@ -162,8 +172,9 @@ public class Battle : MonoBehaviour
         for (int i = 0; i < 1000; i++)
         {
             int randomAttackId = UnityEngine.Random.Range(0, enemy.enemyAttacks.Count);
-            if (!enemy.enemyAttackId[randomAttackId].appliesStatus)
+            if (!enemy.enemyAttackId[randomAttackId].appliesStatus && enemy.enemyAttackId[randomAttackId].currentCooldown == 0)
             {
+                enemy.enemyAttackId[randomAttackId].currentCooldown = enemy.enemyAttackId[randomAttackId].cooldown;
                 return enemy.enemyAttackId[randomAttackId];
             }
         }
@@ -264,6 +275,8 @@ public class Battle : MonoBehaviour
             statusEffect.statusCall[enemyIntention.statusEffect.name](player);//get status effect and apply to player
             Debug.Log("status effect applied");
         }
+        ReduceEnemyCooldowns();
+        enemyIntention.currentCooldown = enemyIntention.cooldown;
         DeathCheck();
         TurnEnd();
     }
@@ -318,15 +331,25 @@ public class Battle : MonoBehaviour
     }
     public IEnumerator Attack(Attack attack)
     {
-        SwitchButtons(false);
+
+        
         //List of buttons. when one is triggered the attack plays and the turn goes to the enemy
         int damage = 0;
-        
+
+        if (attack.currentCooldown != 0)
+        {
+            Debug.Log("this attack is on cooldown");
+            yield break;
+        }
+
         if (attack.appliesStatusEffect != null && enemy.affectedByStatusEffect == null)
         {
             statusEffect.statusCall[attack.appliesStatusEffect.name](enemy); //get status effect and apply to enemy
 
         }
+
+        SwitchButtons(false);
+
         for (int i = 0; i < attack.attackCount; i++)
         {
             //attack animations
@@ -353,7 +376,10 @@ public class Battle : MonoBehaviour
         object sender = "Attack";
         OnPlayerAction?.Invoke(sender, EventArgs.Empty);
 
+        attack.currentCooldown = attack.cooldown;
+
     }
+
     void Defend()
     {
         SwitchButtons(false);
@@ -460,5 +486,27 @@ public class Battle : MonoBehaviour
         }
         unit.transform.position = targetPosition;
 
+    }
+    //do this after enemy attacks
+    void ReduceEnemyCooldowns()
+    {
+        for (int i = 0; i < enemy.enemyAttacks.Count; i++)
+        {
+            if (enemy.enemyAttackId[i].currentCooldown > 0)
+            {
+                enemy.enemyAttackId[i].currentCooldown--;
+            }
+        }
+    }
+    //do this on player action
+    void ReducePlayerCooldowns(object sender,EventArgs e)
+    {
+        for (int i = 0; i < availableAttacks.AttackList.Count; i++)
+        {
+            if (availableAttacks.AttackList[i].currentCooldown > 0)
+            {
+                availableAttacks.AttackList[i].currentCooldown--;
+            }
+        }
     }
 }

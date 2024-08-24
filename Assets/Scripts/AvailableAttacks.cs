@@ -7,6 +7,7 @@ using TMPro;
 public class AvailableAttacks : MonoBehaviour
 {
     [SerializeField]private List<Attack> attacks;
+    public List<Attack> AttackList => attacks;
     [SerializeField]private List<Button> buttons;
     private Dictionary<string, Attack> attackNames = new();
     private void Awake()

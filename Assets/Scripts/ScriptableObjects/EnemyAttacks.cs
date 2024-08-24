@@ -11,4 +11,7 @@ public class EnemyAttacks : ScriptableObject
     public StatusEffect statusEffect;
     public Sprite attackSprite;
     public string animationTriggerName;
+
+    public int currentCooldown;
+    public int cooldown;
 }

@@ -17,3 +17,5 @@ MonoBehaviour:
   damageMultiplier: 1
   attackCount: 2
   appliesStatusEffect: {fileID: 0}
+  currentCooldown: 0
+  cooldown: 4

@@ -7260,6 +7260,7 @@ MonoBehaviour:
   - {fileID: 2068929531, guid: 31a9e5f0f82469948ab29f9ba9f70b5b, type: 3}
   - {fileID: -548003826, guid: 31a9e5f0f82469948ab29f9ba9f70b5b, type: 3}
   - {fileID: 1897714074, guid: 31a9e5f0f82469948ab29f9ba9f70b5b, type: 3}
+  availableAttacks: {fileID: 2098097751}
   statusEffect: {fileID: 2043199929}
   turnCount: 0
 --- !u!4 &2043199928

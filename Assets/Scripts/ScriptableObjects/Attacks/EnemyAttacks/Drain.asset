@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7616920df10fdbc4081c2e10f2bb7a13, type: 3}
   m_Name: Drain
   m_EditorClassIdentifier: 
-  damage: 1
-  attackCount: 1
+  damage: 4
+  attackCount: 3
   appliesStatus: 0
   statusEffect: {fileID: 0}
   attackSprite: {fileID: 21300000, guid: 17fd942a95936a74fafc2986633f2e7f, type: 3}
   animationTriggerName: MushroomDrain
+  currentCooldown: 0
+  cooldown: 5

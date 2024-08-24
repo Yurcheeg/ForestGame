@@ -9,5 +9,7 @@ public class Attack : ScriptableObject
     public int damageMultiplier;
     public int attackCount;
     public StatusEffect appliesStatusEffect;
+
+    public int currentCooldown;
     public int cooldown;
 }
