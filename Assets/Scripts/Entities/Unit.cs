@@ -8,4 +8,6 @@ public abstract class Unit : MonoBehaviour
     public int maxHealth;
     public StatusEffect affectedByStatusEffect;
     public bool canSlide;
+
+    public Animator animator;
 }

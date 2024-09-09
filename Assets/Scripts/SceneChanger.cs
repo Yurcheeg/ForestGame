@@ -3,22 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneChanger : MonoBehaviour
+public class SceneChanger : SingletonPersistent<SceneChanger>
 {
-    public static SceneChanger instance;
-
-    private void Awake()
-    {
-        if(instance != null && instance != this)
-        {
-            Destroy(this);
-        }
-        instance = this;
-        DontDestroyOnLoad(this);
-    }
     public enum Scenes
     {
-        Title,
+        Start,
         Game,
         Battle
     }

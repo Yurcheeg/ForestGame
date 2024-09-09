@@ -66,8 +66,11 @@ public class Battle : MonoBehaviour
         playerAnimator = player.GetComponent<Animator>();
         enemyAnimator = enemy.GetComponent<Animator>();
 
-        PlayerPrefs.SetInt("playerHp", player.maxHealth);//for test
-        player.currentHealth = PlayerPrefs.GetInt("playerHp", player.maxHealth);
+        //PlayerPrefs.SetInt("playerHp", player.maxHealth);//for test
+        if(player.currentHealth == 0)
+        {
+            player.currentHealth = player.maxHealth;
+        }
         enemy.currentHealth = enemy.maxHealth;
 
         BattleUI.SetActive(true);
@@ -92,6 +95,7 @@ public class Battle : MonoBehaviour
 
         OnPlayerAction += EnemyTurn;
         OnPlayerAction += ReducePlayerCooldowns;
+        OnPlayerAction += availableAttacks.ApplyCooldown;
 
         OnTurnEnd += statusEffect.ApplyStatusEffects;
 
@@ -501,11 +505,11 @@ public class Battle : MonoBehaviour
     //do this on player action
     void ReducePlayerCooldowns(object sender,EventArgs e)
     {
-        for (int i = 0; i < availableAttacks.AttackList.Count; i++)
+        for (int i = 0; i < PlayerInfo.instance.attackList.Count; i++)
         {
-            if (availableAttacks.AttackList[i].currentCooldown > 0)
+            if (PlayerInfo.instance.attackList[i].currentCooldown > 0)
             {
-                availableAttacks.AttackList[i].currentCooldown--;
+                PlayerInfo.instance.attackList[i].currentCooldown--;
             }
         }
     }

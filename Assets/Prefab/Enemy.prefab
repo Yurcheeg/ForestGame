@@ -148,6 +148,8 @@ MonoBehaviour:
   currentHealth: 0
   maxHealth: 0
   affectedByStatusEffect: {fileID: 0}
+  canSlide: 0
+  animator: {fileID: 7226929439493140956}
   enemiesScriptable: {fileID: 11400000, guid: ec5897b007242cf4c8e8a7b2f62f7201, type: 2}
 --- !u!70 &8674359156537256238
 CapsuleCollider2D:
@@ -181,8 +183,8 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -4.4087343, y: -0.6601857}
-  m_Size: {x: 10.172356, y: 3.3796062}
+  m_Offset: {x: -0.068320915, y: -0.13872851}
+  m_Size: {x: 4.602347, y: 4.602347}
   m_Direction: 1
 --- !u!95 &7226929439493140956
 Animator:

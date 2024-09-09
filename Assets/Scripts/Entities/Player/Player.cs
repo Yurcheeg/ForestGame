@@ -11,6 +11,5 @@ public class Player : Unit
         {
             Debug.Log("No player Rigidbody found");
         }
-        maxHealth = 30;
     }
 }
