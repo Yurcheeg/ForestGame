@@ -18,17 +18,23 @@ public class EntitySpawn : MonoBehaviour
     }
     void Spawn()
     {
-        System.Random rnd = new System.Random();
-        int prefabIndex = rnd.Next(0, _prefabs.Count);
+        System.Random rnd = new();
+        int prefabIndex;
         for (int i = 1; i < 10; i++)
         {
-            float offset = rnd.Next(20, 25);
+            prefabIndex = rnd.Next(0, _prefabs.Count);
+            float offset = rnd.Next(15, 20);
             Debug.Log(offset);
-            currentObjectPos = new Vector2(offset + lastObjectPos.x, lastObjectPos.y);
+            currentObjectPos = new Vector2(offset + lastObjectPos.x, _prefabs[prefabIndex].transform.position.y);
             Instantiate(_prefabs[prefabIndex], currentObjectPos, Quaternion.identity);
-            Instantiate(_prefabs[prefabIndex], new Vector2(-currentObjectPos.x,currentObjectPos.y), Quaternion.identity);
 
             lastObjectPos = currentObjectPos;
+
+            prefabIndex = rnd.Next(0, _prefabs.Count);
+            currentObjectPos = new Vector2(-(offset + lastObjectPos.x), _prefabs[prefabIndex].transform.position.y);
+            Instantiate(_prefabs[prefabIndex], currentObjectPos, Quaternion.identity);
+
+            lastObjectPos = -currentObjectPos;
         }
     }
 }

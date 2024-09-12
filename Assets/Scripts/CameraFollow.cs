@@ -8,12 +8,10 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Transform player;
     public static float playerOffset;
     private bool following = true;
-    PlayerMovement playerMovement;
 
     private void Start()
     {
         UpdateOffset();
-        playerMovement = player.GetComponent<PlayerMovement>();
     }
     void Update()
     {

@@ -9,7 +9,7 @@ public class StatusEffects : MonoBehaviour
     private int turnsAffectedCount = 0;
     public Dictionary<string, Action<Unit>> statusCall = new();
     [SerializeField]private List<StatusEffect> statusEffectList = new();
-    private Dictionary<string, StatusEffect> statusName = new();
+    public Dictionary<string, StatusEffect> statusName = new();
 
     public event Action<Unit,Color> OnStatusApplied;
 

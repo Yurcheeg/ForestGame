@@ -1,11 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SocialPlatforms;
-using static UnityEngine.GraphicsBuffer;
 
 
 public enum BattleState
@@ -21,6 +20,7 @@ public class Battle : MonoBehaviour
 {
     public Enemy enemy;
     public Player player;
+    public PlayerInfo playerInfo;
     public BattleState state;
 
     public Vector3 playerStartPos;
@@ -59,6 +59,7 @@ public class Battle : MonoBehaviour
     {
         enemy = FindObjectOfType<Enemy>();
         player = FindObjectOfType<Player>();
+        playerInfo = FindObjectOfType<PlayerInfo>();
 
         playerStartPos = player.transform.position;
         enemyStartPos = enemy.transform.position;
@@ -66,12 +67,10 @@ public class Battle : MonoBehaviour
         playerAnimator = player.GetComponent<Animator>();
         enemyAnimator = enemy.GetComponent<Animator>();
 
-        //PlayerPrefs.SetInt("playerHp", player.maxHealth);//for test
-        if(player.currentHealth == 0)
-        {
-            player.currentHealth = player.maxHealth;
-        }
+        player.currentHealth = playerInfo.playerHP;
         enemy.currentHealth = enemy.maxHealth;
+
+        
 
         BattleUI.SetActive(true);
         for (int i = 0; i < actionButtons.Count; i++)
@@ -92,6 +91,7 @@ public class Battle : MonoBehaviour
             availableAttacks = FindAnyObjectByType<AvailableAttacks>();
         }
 
+        
 
         OnPlayerAction += EnemyTurn;
         OnPlayerAction += ReducePlayerCooldowns;
@@ -105,8 +105,18 @@ public class Battle : MonoBehaviour
     }
     public void Start()
     {
-        TurnStart();
+        for (int i = 0; i < enemy.enemyAttacks.Count; i++)
+        {
+            enemy.enemyAttackId[i].currentCooldown = 0;
+        }
 
+        if (playerInfo.statusEffect != null)
+        {
+            MethodInfo statusMethod = statusEffect.GetType().GetMethod(playerInfo.statusEffect.name);
+            statusMethod.Invoke(statusEffect,new object[] { player });
+        }
+
+        TurnStart();
     }
     private void SetBattleState(BattleState newState)
     {
@@ -288,11 +298,13 @@ public class Battle : MonoBehaviour
     {
         if (player.currentHealth <= 0)
         {
+            
             BattleLoss();
             StartCoroutine(PlayAnimation("Death", player));
         }
         else if (enemy.currentHealth <= 0)
         {
+            
             BattleWin();
             StartCoroutine(PlayAnimation("Death",enemy));
         }
@@ -302,8 +314,9 @@ public class Battle : MonoBehaviour
 
         SetBattleState(BattleState.Win);
         Debug.Log("battle won");
-        PlayerPrefs.SetInt("playerHp", player.currentHealth);
-        PlayerPrefs.Save();
+        playerInfo.playerHP = player.currentHealth;
+        if(player.affectedByStatusEffect != null)
+        playerInfo.statusEffect = player.affectedByStatusEffect;
         winScreen.gameObject.SetActive(true);
         //show stuff when won. Buttons are turned off
     }
@@ -311,8 +324,7 @@ public class Battle : MonoBehaviour
     {
         SetBattleState(BattleState.Loss);
         Debug.Log("battle lost");
-        PlayerPrefs.SetInt("playerHp", player.maxHealth);
-        PlayerPrefs.Save();
+        playerInfo.playerHP = player.currentHealth;
         lossScreen.gameObject.SetActive(true);
         //game over screen, buttons to start new game or come back to menu. Buttons are turned off
     }
@@ -378,10 +390,10 @@ public class Battle : MonoBehaviour
             SlideBack(player);
         }
         object sender = "Attack";
-        OnPlayerAction?.Invoke(sender, EventArgs.Empty);
+        
 
         attack.currentCooldown = attack.cooldown;
-
+        OnPlayerAction?.Invoke(sender, EventArgs.Empty);
     }
 
     void Defend()
